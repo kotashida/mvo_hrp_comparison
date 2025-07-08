@@ -1,0 +1,17 @@
+{
+    "assets": [
+        "SPY",
+        "EFA",
+        "TLT",
+        "GLD",
+        "IYR",
+        "DBC",
+        "LQD",
+        "HYG"
+    ],
+    "start_date": "2010-01-01",
+    "end_date": "2025-06-30",
+    "rebalancing_frequency": "quarterly",
+    "transaction_costs": 0.001,
+    "risk_free_rate": 0.02
+}
