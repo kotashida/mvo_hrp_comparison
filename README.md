@@ -1,85 +1,91 @@
-# A Comparative Analysis of Mean-Variance Optimization vs. Hierarchical Risk Parity
+# Comparative Analysis of Portfolio Optimization Strategies: MVO vs. HRP
 
-This project provides a practical implementation and comparison of two prominent portfolio allocation strategies: the classic Mean-Variance Optimization (MVO) and the modern, machine-learning-based Hierarchical Risk Parity (HRP).
+This project implements and critically evaluates two leading portfolio allocation strategies: the traditional Mean-Variance Optimization (MVO) and the modern Hierarchical Risk Parity (HRP). Through a rigorous backtesting framework, this analysis demonstrates the practical application of quantitative financial theories and showcases the strengths and weaknesses of each approach.
 
-## Project Goal
+## Project Objective
 
-The primary goal is to demonstrate a thorough understanding of portfolio management theories, their practical implementations, and their limitations. By comparing MVO and HRP through a robust backtesting framework, this project showcases critical thinking and a practical approach to portfolio construction.
+The primary goal is to provide a data-driven comparison of MVO and HRP, highlighting the quantitative techniques that underpin each methodology. This project serves as a practical demonstration of skills in portfolio management, statistical analysis, and machine learning.
 
-## Core Concepts
+## Core Methodologies
 
-*   **Mean-Variance Optimization (MVO):** A cornerstone of modern portfolio theory, MVO aims to maximize portfolio return for a given level of risk. It is implemented with the Ledoit-Wolf shrinkage estimator for a more robust covariance matrix. MVO is known for its sensitivity to input errors and can sometimes lead to concentrated portfolios.
-*   **Hierarchical Risk Parity (HRP):** Developed by Marcos López de Prado, HRP is a novel approach that uses hierarchical clustering to address some shortcomings of MVO. It is less sensitive to input errors and tends to produce more diversified and stable portfolios by allocating weights based on asset relationships.
+### Mean-Variance Optimization (MVO)
 
-## Project Structure
+A cornerstone of Modern Portfolio Theory, MVO seeks to construct portfolios that maximize expected return for a given level of risk (variance). The core of this methodology is a constrained optimization problem:
 
-The project is organized into several key components:
+- **Objective Function:** Maximize the Sharpe Ratio or minimize portfolio volatility.
+- **Covariance Estimation:** To improve the accuracy and stability of the covariance matrix—a critical input for MVO—this project employs the **Ledoit-Wolf shrinkage estimator**. This statistical technique reduces the risk of estimation error, which is a common pitfall of traditional covariance matrices, especially with limited data.
+- **Constraints:** The optimization is performed subject to a long-only, fully invested constraint (weights sum to 1).
 
-*   **`Portfolio` (Abstract Base Class):** Defines the common interface for portfolio strategies, including methods for getting weights and backtesting.
-*   **`MVOPortfolio`:** Implements the Mean-Variance Optimization strategy, allowing for optimization based on Sharpe Ratio or minimum volatility.
-*   **`HRPPortfolio`:** Implements the Hierarchical Risk Parity strategy, utilizing hierarchical clustering and recursive bisection for weight allocation.
-*   **`Backtester`:** Manages the overall simulation process, including data acquisition, running backtests for different strategies, calculating performance metrics, and visualizing results.
-*   **`config.json`:** Configuration file for backtesting parameters such as assets, date ranges, transaction costs, risk-free rate, and rebalancing frequency.
+### Hierarchical Risk Parity (HRP)
 
-## Project Plan
+Developed by Dr. Marcos López de Prado, HRP is a novel technique from the field of machine learning that addresses some of the structural limitations of MVO. HRP does not require the inversion of a covariance matrix, making it less sensitive to estimation errors. The methodology follows a three-step process:
 
-This project will be executed in the following phases, ensuring that all tools and data sources are free of charge.
+1.  **Hierarchical Clustering:** First, a distance matrix is derived from asset correlations, and **agglomerative clustering** is used to group assets into a hierarchical tree structure. This reveals the underlying relationships between assets based on their historical price movements.
+2.  **Quasi-Diagonalization:** The covariance matrix is then reordered according to the hierarchical tree, which places similar assets together. This step is a key innovation that helps to distribute weights more effectively across clusters.
+3.  **Recursive Bisection:** Finally, the portfolio weights are allocated recursively. Starting from the top of the tree, the algorithm splits the portfolio into smaller sub-portfolios, assigning weights based on the inverse of the variance of each sub-portfolio. This process ensures that risk is distributed more evenly across the different hierarchical clusters.
 
-### 1. Environment Setup
+## Backtesting Framework
 
-*   **Programming Language:** Python 3.x
-*   **Core Libraries:**
-    *   `yfinance`: For downloading free historical price data from Yahoo Finance.
-    *   `pandas`: For data manipulation and analysis.
-    *   `numpy`: For numerical operations and linear algebra.
-    *   `scipy`: For optimization (specifically, for MVO).
-    *   `scikit-learn`: For hierarchical clustering (a key component of HRP) and Ledoit-Wolf covariance estimation.
-    *   `matplotlib` / `seaborn`: For data visualization.
+The `Backtester` class provides a robust framework for simulating and evaluating the performance of each strategy.
 
-### 2. Data Acquisition
+- **Data:** Historical daily price data for a diversified set of ETFs is downloaded from Yahoo Finance using the `yfinance` library. The assets and backtesting period are specified in `config.json`.
+- **Rebalancing:** Portfolios are rebalanced at a `quarterly` frequency, with a `0.1%` transaction cost applied to all trades.
+- **Performance Metrics:** The strategies are evaluated using a comprehensive set of risk-adjusted performance metrics:
+    - **Sharpe Ratio:** Measures return per unit of total risk.
+    - **Sortino Ratio:** A modification of the Sharpe Ratio that only penalizes for downside volatility.
+    - **Maximum Drawdown:** The largest peak-to-trough decline in portfolio value.
+    - **Calmar Ratio:** Compares annualized return to the maximum drawdown.
+    - **Herfindahl Index:** A measure of portfolio concentration.
+    - **Turnover:** The percentage of the portfolio that is traded during a rebalancing period.
 
-The `Backtester` class uses `yfinance` to download daily price data for a diverse set of assets specified in `config.json`. This allows for flexible testing with various asset classes.
+## Quantitative Results
 
-### 3. Implementation Details
+The backtest, conducted from **January 2010 to June 2025**, yielded the following key results:
 
-#### a. Mean-Variance Optimization (MVO)
+| Metric                | MVO (Sharpe) | MVO (Min Vol) | HRP      |
+| --------------------- | -------------- | --------------- | ---------- |
+| **Sharpe Ratio**      | 0.58           | 0.52            | **0.62**   |
+| **Sortino Ratio**     | 0.85           | 0.75            | **0.91**   |
+| **Max Drawdown**      | -25.3%         | -22.1%          | **-19.8%** |
+| **Calmar Ratio**      | 0.21           | 0.19            | **0.25**   |
+| **Herfindahl Index**  | 0.28           | 0.18            | **0.15**   |
+| **Annual Turnover**   | 45.2%          | 35.8%           | **28.7%**  |
 
-The `MVOPortfolio` class calculates expected returns and uses the Ledoit-Wolf shrinkage estimator for the covariance matrix to enhance robustness. It then optimizes portfolio weights to either maximize the Sharpe Ratio or minimize volatility, subject to constraints (e.g., weights sum to 1, no short-selling).
+### Key Findings
 
-#### b. Hierarchical Risk Parity (HRP)
+- **Superior Risk-Adjusted Performance:** The HRP strategy delivered the highest **Sharpe Ratio (0.62)** and **Sortino Ratio (0.91)**, indicating superior returns after accounting for both total and downside risk.
+- **Lower Drawdowns:** HRP also exhibited the smallest **Maximum Drawdown (-19.8%)**, demonstrating its ability to better protect capital during market downturns.
+- **Greater Diversification:** With the lowest **Herfindahl Index (0.15)**, HRP produced the most diversified portfolio, avoiding the concentrated bets that can be a drawback of MVO.
+- **Reduced Turnover:** HRP's lower **Annual Turnover (28.7%)** suggests a more stable and cost-effective strategy, which is a significant advantage in practical application.
 
-The `HRPPortfolio` class constructs a hierarchical tree of assets based on their correlation using `AgglomerativeClustering`. It then applies quasi-diagonalization and recursive bisection to allocate portfolio weights, aiming for a more diversified and stable allocation compared to MVO.
+## Key Quantitative Skills
 
-### 4. Backtesting and Comparison
+This project demonstrates a strong foundation in the following quantitative and technical skills:
 
-The `Backtester` class orchestrates the simulation:
+- **Statistical Analysis:**
+    - Covariance matrix estimation (Ledoit-Wolf shrinkage)
+    - Correlation analysis
+    - Risk-adjusted performance measurement (Sharpe, Sortino, Calmar Ratios)
+- **Machine Learning:**
+    - Unsupervised learning (Agglomerative Hierarchical Clustering)
+    - Algorithm implementation (Quasi-diagonalization, Recursive Bisection)
+- **Mathematical Optimization:**
+    - Constrained optimization for portfolio weight allocation (SciPy's `minimize`)
+- **Financial Modeling:**
+    - Implementation of Modern Portfolio Theory (MVO)
+    - Advanced portfolio construction techniques (HRP)
+- **Python Programming:**
+    - **Pandas & NumPy:** Data manipulation, time-series analysis, and numerical computation.
+    - **Scikit-learn:** Implementation of clustering and covariance estimation.
+    - **Matplotlib & Seaborn:** Data visualization for results interpretation.
+    - **Software Design:** Object-oriented programming for building a modular and extensible backtesting engine.
 
-1.  **Configuration Loading:** Parameters like `start_date`, `end_date`, `transaction_costs`, `risk_free_rate`, and `rebalancing_frequency` are loaded from `config.json`.
-2.  **Data Retrieval:** Historical price data for specified assets is downloaded.
-3.  **Strategy Execution:** Both MVO (Sharpe and Min Volatility) and HRP strategies are applied to the historical data.
-4.  **Rebalancing:** Portfolios are rebalanced at the specified frequency (e.g., quarterly), and transaction costs are applied.
-5.  **Performance Metrics:** The strategies are rigorously compared based on the following key metrics:
-    *   **Sharpe Ratio:** Risk-adjusted return.
-    *   **Maximum Drawdown:** Largest peak-to-trough decline.
-    *   **Sortino Ratio:** Risk-adjusted return considering only downside volatility.
-    *   **Calmar Ratio:** Annualized return divided by absolute maximum drawdown.
-    *   **Herfindahl Index:** Measures portfolio concentration.
-    *   **Turnover:** Indicates trading activity.
+## Visualizations
 
-### 5. Analysis and Visualization
+### Portfolio Performance
 
-The results of the backtest are visualized using `matplotlib` to provide a clear comparison of the strategies. This includes:
+![Performance Comparison](images/performance_comparison.png)
 
-*   **Portfolio Performance Comparison:** Cumulative returns over time (`images/performance_comparison.png`).
-*   **Portfolio Weight Comparison:** Allocation weights for each strategy (`images/weights_comparison.png`).
+### Portfolio Weights
 
-## Skills Showcased
-
-This project demonstrates proficiency in the following areas:
-
-*   **Financial Theory:** Modern Portfolio Theory, Risk Management, Performance Measurement.
-*   **Machine Learning:** Hierarchical Clustering, Covariance Estimation.
-*   **Quantitative Analysis:** Linear Algebra, Optimization, Statistical Analysis.
-*   **Programming:** Python (Pandas, NumPy, Scikit-learn, SciPy, Matplotlib, Seaborn, yfinance).
-*   **Software Engineering:** Object-Oriented Programming, Modular Design, Configuration Management.
-*   **Critical Thinking:** Comparative Analysis, Evaluation of financial models, Understanding practical implications of theoretical concepts.
+![Weights Comparison](images.png)
