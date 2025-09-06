@@ -88,4 +88,4 @@ This project demonstrates a strong foundation in the following quantitative and 
 
 ### Portfolio Weights
 
-![Weights Comparison](images.png)
+![Weights Comparison](images/weights_comparison.png)
